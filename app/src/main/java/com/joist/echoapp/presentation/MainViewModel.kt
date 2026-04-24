@@ -15,6 +15,7 @@ internal class MainViewModel(private val repository: TextRepository) : ViewModel
     val uiState: StateFlow<EchoUiState> = _uiState.asStateFlow()
 
     fun submit(text: String) {
+        if (_uiState.value is EchoUiState.Loading) return
         viewModelScope.launch {
             _uiState.value = EchoUiState.Loading
             repository.validate(text)

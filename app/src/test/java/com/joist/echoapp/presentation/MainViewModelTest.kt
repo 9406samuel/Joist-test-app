@@ -13,14 +13,23 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModelTest {
+
+    @Mock
+    private lateinit var repository: TextRepository
 
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
+        MockitoAnnotations.openMocks(this)
         Dispatchers.setMain(testDispatcher)
     }
 
@@ -30,29 +39,28 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `submit with non-empty text emits Success`() = runTest {
-        val repo = object : TextRepository {
-            override suspend fun validate(text: String) = Result.success(text)
-        }
-        val viewModel = MainViewModel(repo)
+    fun `submit with non-empty text emits Success`() = runTest(testDispatcher) {
+        whenever(repository.validate(any())).thenReturn(Result.success("Hello"))
+        val viewModel = MainViewModel(repository)
 
         viewModel.submit("Hello")
         advanceUntilIdle()
 
         assertEquals(EchoUiState.Success("Hello"), viewModel.uiState.value)
+        verify(repository).validate("Hello")
     }
 
     @Test
-    fun `submit with empty text emits Error`() = runTest {
-        val repo = object : TextRepository {
-            override suspend fun validate(text: String) =
-                Result.failure<String>(Exception("Text cannot be empty"))
-        }
-        val viewModel = MainViewModel(repo)
+    fun `submit with empty text emits Error`() = runTest(testDispatcher) {
+        whenever(repository.validate(any())).thenReturn(
+            Result.failure(Exception("Text cannot be empty"))
+        )
+        val viewModel = MainViewModel(repository)
 
         viewModel.submit("")
         advanceUntilIdle()
 
         assertTrue(viewModel.uiState.value is EchoUiState.Error)
+        verify(repository).validate("")
     }
 }

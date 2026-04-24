@@ -1,9 +1,9 @@
 package com.joist.echoapp.presentation
 
 import android.os.Bundle
-import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -24,52 +24,27 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.submitButton.setOnClickListener {
-            val text = binding.textInput.text?.toString() ?: ""
-            viewModel.submit(text)
-        }
+        binding.submitButton.setOnClickListener { submitText() }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    when (state) {
-                        is EchoUiState.Idle -> showIdle()
-                        is EchoUiState.Loading -> showLoading()
-                        is EchoUiState.Success -> showSuccess(state.text)
-                        is EchoUiState.Error -> showError(state.message)
+                    if (state is EchoUiState.Success) binding.outputText.text = state.text
+                    if (state is EchoUiState.Error) binding.errorText.text = state.message
+
+                    binding.apply {
+                        progressBar.isVisible = state is EchoUiState.Loading
+                        submitButton.isEnabled = state !is EchoUiState.Loading
+                        outputText.isVisible = state is EchoUiState.Success
+                        errorText.isVisible = state is EchoUiState.Error
                     }
+
                 }
             }
         }
     }
 
-    private fun showIdle() {
-        binding.progressBar.visibility = View.GONE
-        binding.outputText.visibility = View.GONE
-        binding.errorText.visibility = View.GONE
-        binding.submitButton.isEnabled = true
-    }
-
-    private fun showLoading() {
-        binding.progressBar.visibility = View.VISIBLE
-        binding.outputText.visibility = View.GONE
-        binding.errorText.visibility = View.GONE
-        binding.submitButton.isEnabled = false
-    }
-
-    private fun showSuccess(text: String) {
-        binding.progressBar.visibility = View.GONE
-        binding.outputText.visibility = View.VISIBLE
-        binding.errorText.visibility = View.GONE
-        binding.outputText.text = text
-        binding.submitButton.isEnabled = true
-    }
-
-    private fun showError(message: String) {
-        binding.progressBar.visibility = View.GONE
-        binding.outputText.visibility = View.GONE
-        binding.errorText.visibility = View.VISIBLE
-        binding.errorText.text = message
-        binding.submitButton.isEnabled = true
+    private fun submitText() {
+        viewModel.submit(binding.textInput.text?.toString().orEmpty())
     }
 }

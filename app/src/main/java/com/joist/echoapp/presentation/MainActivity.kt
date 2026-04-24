@@ -2,6 +2,7 @@ package com.joist.echoapp.presentation
 
 import android.os.Bundle
 import androidx.activity.viewModels
+import androidx.core.widget.doOnTextChanged
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -25,6 +26,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.submitButton.setOnClickListener { submitText() }
+
+        binding.textInput.doOnTextChanged { _, _, _, _ ->
+            binding.textInputLayout.error = null
+        }
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {

@@ -24,7 +24,9 @@
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_input">
+            android:hint="@string/hint_input"
+            app:errorEnabled="true"
+            xmlns:app="http://schemas.android.com/apk/res-auto">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/textInput"
@@ -56,15 +58,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/result_margin_top"
             android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:visibility="gone" />
-
-        <TextView
-            android:id="@+id/errorText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/result_margin_top"
-            android:textAppearance="?attr/textAppearanceBodyLarge"
-            android:textColor="?attr/colorError"
             android:visibility="gone" />
 
     </LinearLayout>

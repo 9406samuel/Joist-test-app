@@ -30,15 +30,13 @@ class MainActivity : AppCompatActivity() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     if (state is EchoUiState.Success) binding.outputText.text = state.text
-                    if (state is EchoUiState.Error) binding.errorText.text = state.message
 
                     binding.apply {
+                        textInputLayout.error = if (state is EchoUiState.Error) state.message else null
                         progressBar.isVisible = state is EchoUiState.Loading
                         submitButton.isEnabled = state !is EchoUiState.Loading
                         outputText.isVisible = state is EchoUiState.Success
-                        errorText.isVisible = state is EchoUiState.Error
                     }
-
                 }
             }
         }
